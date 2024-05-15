@@ -11,23 +11,38 @@ namespace TransactionSystem.Classes
     {
         Random rnd = new Random();
         bool isRunning = true;
-        public BankAccount account;
-        int amount;
-        int totalAmountTransactioned;
-
+        public BankAccount bankAccount;
+        double amount;
+        double totalAmountTransactioned;
+        int id;
         public bool Running
         {
             get { return isRunning; }
             set { isRunning = value; }
         }
 
-        public Client(int id)
+        public double totalAmount
         {
-            while(isRunning)
+            get { return totalAmountTransactioned; }
+            set { totalAmountTransactioned = value; }
+        }
+
+        public Client(int id, BankAccount bankAccount)
+        {
+            this.bankAccount = bankAccount;
+            this.id = id;
+        }
+
+        public void Run()
+        {
+            while (isRunning)
             {
                 amount = rnd.Next(-10, 10);
-                account.deposit(id, amount);
+                string clientTransactionInfo = amount <= 0 ? $"Withdrew {amount}" : $"Deposited {amount}";
+                bankAccount.deposit(id, amount, clientTransactionInfo);
                 totalAmountTransactioned += amount;
+                
+                Thread.Sleep(rnd.Next(1000, 10000));
             }
         }
     }

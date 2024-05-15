@@ -8,13 +8,23 @@ namespace TransactionSystem.Classes
 {
     internal class Stamp
     {
-        public int clientID;
-        public double balance;
+        readonly int clientID;
+        readonly double loggedBalance;
+        string info;
 
-        public Stamp(int clientID, double balance)
+        public Stamp(int clientID, double loggedBalance, string info)
         {
+            this.loggedBalance = loggedBalance;
             this.clientID = clientID;
-            this.balance = balance;
+            this.info = info;
+        }
+
+        public int ClientID { get { return clientID; } }
+        public double Balance { get { return loggedBalance; } }
+
+        public override string ToString()
+        {
+            return $"Client ID: {clientID} {info}";
         }
     }
 }

@@ -10,20 +10,33 @@ namespace TransactionSystem.Classes
     internal class BankAccount
     {
         public double balance;
-        Security security = new Security();
+        public Security security = new Security();
         int numberOfTransactions;
+        Mutex depositMutex = new Mutex();
 
-        public BankAccount() { }
-
-        public void deposit(int amount, int clientID)
+        public BankAccount() 
         {
-            security.MakePreTransactionStamp(clientID, balance);
-            balance += amount;
-            security.MakePostTransactionStamp(clientID, balance);
-            security.VerifyLastTransaction(amount);
-            numberOfTransactions++;
+            
         }
 
+        public void deposit(int clientID, double amount, string info)
+        {
+            try
+            {
+                depositMutex.WaitOne();
+                Stamp preTransactionStamp = security.MakePreTransactionStamp(clientID, balance, info);
+                balance += amount;
+                Stamp postTransactionStamp = security.MakePostTransactionStamp(clientID, balance, info);
+                security.VerifyLastTransaction(amount, preTransactionStamp, postTransactionStamp);
+                numberOfTransactions++;
+            }
+            finally
+            {
+                depositMutex.ReleaseMutex();
+            }
+        }
+
+        public int transactionCount { get { return numberOfTransactions; } }
 
 
     }

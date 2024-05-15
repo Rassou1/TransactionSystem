@@ -11,33 +11,54 @@ namespace TransactionSystem.Managers
     {
         public List<Stamp> StampHistory = new List<Stamp>();
         public int numberOfErrors;
-        
+        Mutex securityMutex = new Mutex();
+        public string[] infoStrings;
         
 
 
-        public void MakePreTransactionStamp(int clientID, double balance)
+        public Stamp MakePreTransactionStamp(int clientID, double balance, string info)
         {
-            Stamp beforeStamp = new Stamp(clientID, balance);
+            Stamp beforeStamp = new Stamp(clientID, balance, info);
             StampHistory.Add(beforeStamp);
+            return beforeStamp;
         }
-        public void MakePostTransactionStamp(int clientID, double balance)
+        public Stamp MakePostTransactionStamp(int clientID, double balance, string info)
         {
-            Stamp afterStamp = new Stamp(clientID, balance);
-            StampHistory.Add(afterStamp);
+            Stamp afterStamp = new Stamp(clientID, balance, info);
+            return afterStamp;
         }
 
-        public void VerifyLastTransaction(int transactionAmount)
+        public void VerifyLastTransaction(double transactionAmount, Stamp preTransactionStamp, Stamp postTransactionStamp)
         {
-            if(StampHistory.Count > 0)
+            if (StampHistory.Count >= 0 && transactionAmount != postTransactionStamp.Balance - preTransactionStamp.Balance)
             {
-                if(transactionAmount == StampHistory[StampHistory.Count].balance - StampHistory[StampHistory.Count - 1].balance)
+                numberOfErrors++;
+            }
+        }
+
+        public string[] SecurityInfoStrings()
+        {
+            try
+            {
+                securityMutex.WaitOne();
+                if(StampHistory.Count == 0)
                 {
-                    return;
+                    return new string[] { "No transactions have been completed yet." };
                 }
-                else
+
+                infoStrings = new string[StampHistory.Count+1];
+
+                infoStrings[0] = "Transaction Log";
+
+                for (int i = 0; i < StampHistory.Count; i++)
                 {
-                    numberOfErrors++;
+                    infoStrings[i+1] = StampHistory[i].ToString();
                 }
+                return infoStrings;
+            }
+            finally
+            {
+                securityMutex.ReleaseMutex();
             }
         }
 
