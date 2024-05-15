@@ -11,6 +11,7 @@ namespace TransactionSystem.Classes
     {
         public double balance;
         Security security = new Security();
+        int numberOfTransactions;
 
         public BankAccount() { }
 
@@ -20,6 +21,7 @@ namespace TransactionSystem.Classes
             balance += amount;
             security.MakePostTransactionStamp(clientID, balance);
             security.VerifyLastTransaction(amount);
+            numberOfTransactions++;
         }
 
 

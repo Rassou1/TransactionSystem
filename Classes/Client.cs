@@ -21,11 +21,10 @@ namespace TransactionSystem.Classes
             set { isRunning = value; }
         }
 
-        public Client(int id, int amount)
+        public Client(int id)
         {
             while(isRunning)
             {
-                this.amount = amount;
                 amount = rnd.Next(-10, 10);
                 account.deposit(id, amount);
                 totalAmountTransactioned += amount;
